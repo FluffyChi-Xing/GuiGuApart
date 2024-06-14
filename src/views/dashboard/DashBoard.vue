@@ -71,6 +71,8 @@ const quick = ref([
 ])
 
 //echarts
+//color
+const color = localStorage.getItem('primary_color')
 //om
 onMounted(() => {
   let charts = echarts.init(document.getElementById('charts'))
@@ -97,12 +99,20 @@ onMounted(() => {
     title: {
       text: '预约数量',
       x: 'left',
-    }
+    },
+    color: color,
   };
   charts.setOption(option);
 })
 //jump function
 const jump = (item) => {
+  switch (item.path) {
+    case '/users':
+      router.push(item.path)
+          break;
+  }
+}
+const quickJump = (item) => {
   switch (item.path) {
     case '/users':
       router.push(item.path)
@@ -153,9 +163,7 @@ const jump = (item) => {
         <el-card
             class="w-full h-full hov-shadow"
         >
-          <div id="charts" class="w-full h-[230px] relative block">
-
-          </div>
+          <div id="charts" class="w-full h-[230px] relative block" />
         </el-card>
       </div>
     </div>
@@ -204,6 +212,7 @@ const jump = (item) => {
                 class="my-auto mr-4"
                 v-for="item in quick"
                 :key="item"
+                @click="quickJump(item)"
             >
               {{ item.name }}
             </el-button>
