@@ -3,6 +3,7 @@ import { reactive } from "vue";
 import { ref } from "vue";
 import TableComponent from "@/components/common/TableComponent.vue";
 import PaginationComponent from "@/components/common/PaginationComponent.vue";
+import CopyRight from "@/components/common/CopyRight.vue";
 
 //table data
 const data = [
@@ -113,7 +114,7 @@ const table = reactive({
   ],
   multiple: false,
   highLight: true,
-  maxHeight: '473',
+  maxHeight: '300',
   canEdit: true,
   isFixed: 'right',
   width: '300px',
@@ -160,50 +161,54 @@ const dept = ref([
 </script>
 
 <template>
-  <div class="w-full h-full relative block p-4 bg-white overflow-hidden">
-    <!-- top banner -->
-    <div class="w-full h-14 relative flex">
-      <!-- user search -->
-      <div class="w-auto h-full relative flex">
-        <el-input
-            v-model="value"
-            placeholder="请输入用户名..."
-            clearable
-            prefix-icon="User"
-            style="width: 240px;height: 32px"
-            class="my-auto"
-        />
-        <el-button type="primary" icon="Search" class="ml-4 my-auto">搜索</el-button>
-        <!-- refresh button -->
-        <el-button type="primary" icon="Refresh" class="ml-4 my-auto">刷新</el-button>
+  <div class="w-full h-full relative block overflow-hidden">
+    <div style="height: calc(100% - 100px)" class="w-full block p-4 bg-white relative overflow-hidden mb-[10px]">
+      <!-- top banner -->
+      <div class="w-full h-14 relative flex">
+        <!-- user search -->
+        <div class="w-auto h-full relative flex">
+          <el-input
+              v-model="value"
+              placeholder="请输入用户名..."
+              clearable
+              prefix-icon="User"
+              style="width: 240px;height: 32px"
+              class="my-auto"
+          />
+          <el-button type="primary" icon="Search" class="ml-4 my-auto">搜索</el-button>
+          <!-- refresh button -->
+          <el-button type="primary" icon="Refresh" class="ml-4 my-auto">刷新</el-button>
+        </div>
+        <!-- add new user button -->
+        <el-button type="primary" icon="Plus" class="ml-auto" @click="dialogShow = true">添加</el-button>
       </div>
-      <!-- add new user button -->
-      <el-button type="primary" icon="Plus" class="ml-auto" @click="dialogShow = true">添加</el-button>
+      <!-- table body -->
+      <div style="height: calc(100% - 112px)" class="w-full relative block overflow-hidden">
+        <TableComponent
+            :data="data"
+            :table="table.label"
+            :is-fixed="table.isFixed"
+            :high-light="table.highLight"
+            :can-edit="table.canEdit"
+            :operate="table.operate"
+            :stripe="table.stripe"
+            :max-height="table.maxHeight"
+            :operate-width="table.width"
+            :border="table.border"
+            :current_change="currentChange"
+        />
+      </div>
+      <!-- pagination -->
+      <div class="w-full h-14 relative flex justify-center">
+        <PaginationComponent
+            :total="pages.total"
+            :hide="pages.hide"
+            :page-count="pages.pageCount"
+        />
+      </div>
     </div>
-    <!-- table body -->
-    <div style="height: calc(100% - 112px)" class="w-full relative block overflow-hidden">
-      <TableComponent
-          :data="data"
-          :table="table.label"
-          :is-fixed="table.isFixed"
-          :high-light="table.highLight"
-          :can-edit="table.canEdit"
-          :operate="table.operate"
-          :stripe="table.stripe"
-          :max-height="table.maxHeight"
-          :operate-width="table.width"
-          :border="table.border"
-          :current_change="currentChange"
-      />
-    </div>
-    <!-- pagination -->
-    <div class="w-full h-14 relative flex justify-center">
-      <PaginationComponent
-          :total="pages.total"
-          :hide="pages.hide"
-          :page-count="pages.pageCount"
-      />
-    </div>
+    <!-- copyright -->
+    <CopyRight />
     <!-- add new user dialog -->
     <el-dialog
         title="添加用户"

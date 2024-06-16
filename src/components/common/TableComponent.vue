@@ -49,6 +49,11 @@ const props = defineProps({
         </template>
       </el-table-column>
       <el-table-column
+
+      >
+
+      </el-table-column>
+      <el-table-column
           v-if="props.canEdit"
           :fixed="props.isFixed"
           label="操作"

@@ -5,6 +5,9 @@ import DashBoard from "@/views/dashboard/DashBoard.vue";
 import UserCenter from "@/views/usercenter/UserCenter.vue";
 import LoginPage from "@/views/login/LoginPage.vue";
 import UserManage from "@/views/UserManage/UserManage.vue";
+import JobManage from "@/views/job/JobManage.vue";
+import LookAndBook from "@/views/looking&book/LookAndBook.vue";
+import AttributeManage from "@/views/attribute/AttributeManage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -36,6 +39,30 @@ const router = createRouter({
           meta: {
             title: '尚庭公寓 | 用户管理'
           }
+        },
+        {
+          path: '/job',
+          name: '岗位管理',
+          component: JobManage,
+          meta: {
+            title: '尚庭公寓 | 岗位管理',
+          },
+        },
+        {
+          path: '/look',
+          name: '看房预约管理',
+          component: LookAndBook,
+          meta: {
+            title: '尚庭公寓 | 看房预约管理'
+          },
+        },
+        {
+          path: '/attribute',
+          name: '属性管理',
+          component: AttributeManage,
+          meta: {
+            title: '尚庭公寓 | 属性管理'
+          },
         }
       ]
     },

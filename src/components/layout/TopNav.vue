@@ -32,9 +32,9 @@ const jump = (item) => {
 }
 
 //close
-const close = (item) => {
- if (tagsList.value.includes(item)) {
-   tagsList.value.pop(item)
+const close = (tags) => {
+ if (tagsList.value.includes(tags)) {
+   tagsList.value = tagsList.value.filter((item) => item.name !== tags.name)
  }
 }
 

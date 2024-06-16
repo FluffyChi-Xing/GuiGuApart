@@ -35,6 +35,15 @@ const change = (to) => {
     case '/users':
       router.push(to)
           break;
+    case '/job':
+      router.push(to)
+          break;
+    case '/look':
+      router.push(to)
+          break;
+    case '/attribute':
+      router.push(to)
+          break;
   }
 }
 //持久化菜单高亮
@@ -44,6 +53,15 @@ const initMenu = () => {
       activeDefault.value = route.fullPath
           break;
     case '/users':
+      activeDefault.value = route.fullPath
+          break;
+    case '/job':
+      activeDefault.value = route.fullPath
+          break;
+    case '/look':
+      activeDefault.value = route.fullPath
+          break;
+    case '/attribute':
       activeDefault.value = route.fullPath
           break;
   }
@@ -87,7 +105,7 @@ watch(() => route.fullPath, () => {
           <el-icon><User /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
-        <el-menu-item index="2-2">
+        <el-menu-item index="/job">
           <el-icon><List /></el-icon>
           <span>岗位管理</span>
         </el-menu-item>
@@ -105,7 +123,7 @@ watch(() => route.fullPath, () => {
           <el-icon><HomeFilled /></el-icon>
           <span>房间管理</span>
         </el-menu-item>
-        <el-menu-item index="3-3">
+        <el-menu-item index="/attribute">
           <el-icon><More /></el-icon>
           <span>属性管理</span>
         </el-menu-item>
@@ -115,7 +133,7 @@ watch(() => route.fullPath, () => {
           <el-icon><Document /></el-icon>
           <span>预约管理</span>
         </template>
-        <el-menu-item index="4-1">
+        <el-menu-item index="/look">
           <el-icon><Clock /></el-icon>
           <span>看房预约管理</span>
         </el-menu-item>
