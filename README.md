@@ -1,6 +1,8 @@
 # GuiGuApart
 
 This template should help get you started developing with Vue 3 in Vite.
+![屏幕截图 2024-06-16 164457](https://github.com/FluffyChi-Xing/GuiGuApart/assets/121754413/f6e1c9e7-f320-49cf-bc50-11fc7cc1f385)
+
 
 ## Recommended IDE Setup
 
