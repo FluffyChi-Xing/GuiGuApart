@@ -8,6 +8,7 @@ import UserManage from "@/views/UserManage/UserManage.vue";
 import JobManage from "@/views/job/JobManage.vue";
 import LookAndBook from "@/views/looking&book/LookAndBook.vue";
 import AttributeManage from "@/views/attribute/AttributeManage.vue";
+import axios from "axios";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -82,6 +83,21 @@ const checkName = async (to) => {
     document.title = to.meta.title
   }
 }
+//refresh token
+const refreshToken = async () => {
+  const refresh = localStorage.getItem('refresh').toString()
+  if (refresh) {
+    await axios.get(`http://localhost:3000/employee/refresh?refresh=${refresh}`).then((res) => {
+      if (res.data.code === 200) {
+        localStorage.setItem('access', res.data.access);
+        localStorage.setItem('refresh', res.data.refresh);
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
+}
+
 //前置路由守卫
 router.beforeEach(async (to) => {
   await checkName(to)
@@ -89,6 +105,8 @@ router.beforeEach(async (to) => {
 })
 //后置路由守卫
 router.afterEach(async () => {
+  //每次切换页面后刷新refresh token
+  await refreshToken()
   NProgress.done()
 })
 export default router

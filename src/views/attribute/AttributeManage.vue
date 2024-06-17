@@ -307,6 +307,37 @@ const close_2 = (room) => {
         </template>
       </el-card>
     </div>
+    <!-- 支付方式管理 -->
+    <div class="w-full h-auto relative block mb-4">
+      <el-card
+          class="hov-shadow"
+      >
+        <!-- 支付方式 -->
+        <div class="w-full h-[44px] relative flex mb-4">
+            <span class="text-black w-[100px] text-[15px] my-auto">
+              支付方式
+              <el-icon class="my-auto"><Warning /></el-icon>
+            </span>
+          <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <el-tag
+                v-for="item in rooms"
+                :key="item"
+                closable
+                class="my-auto mr-4"
+                @close="close_2(item)"
+            >
+              {{ item }}
+            </el-tag>
+          </div>
+          <div class="w-[100px] h-full relative flex justify-center">
+            <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
+          </div>
+        </div>
+        <template #header>
+          <span class="text-black font-bold text-[15px]">支付方式管理</span>
+        </template>
+      </el-card>
+    </div>
     <!-- copy right -->
     <CopyRight />
   </div>
