@@ -4,6 +4,7 @@ import {ArrowRight, Warning} from "@element-plus/icons-vue";
 import * as echarts from 'echarts';
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 //router
 const router = useRouter()
@@ -119,6 +120,10 @@ const quickJump = (item) => {
           break;
   }
 }
+
+//pull data
+//rooms data
+const rooms = ref()
 </script>
 
 <template>
