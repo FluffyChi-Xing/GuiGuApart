@@ -7,34 +7,97 @@ import {onMounted} from "vue";
 import {ElMessage} from "element-plus";
 
 //apartment tags
-const apart = ref([
-  '靠近地铁',
-  '靠近公交站',
-  '靠近商圈',
-  '靠近医院'
-])
+const apart = ref([])
+const apartShow = ref(false)
+const apartName = ref()
 //close
-const close_1 = (aparts) => {
-  apart.value = apart.value.filter((item) => item !== aparts )
+const close = (item) => {
+  axios.get(`http://localhost:3000/label/deleteApart?id=${item.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear apart list
+      apart.value = []
+      //repull
+      pullApart()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
 }
-//rooms tags
-const rooms = ref([
-    '朝南',
-    '阳光好',
-    '有车位',
-    '落地窗',
-    'LOFT',
-    '单身公寓'
-])
+//get access function
+const getAccess = () => {
+  return localStorage.getItem('access').toString();
+}
+
+
+//apart
+const pullApart = () => {
+  axios.get('http://localhost:3000/label/pullApart', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      res.data.data.forEach((item) => {
+        apart.value.push(item)
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//添加apart labels
+const createApart = () => {
+  if (apartName.value) {
+    axios.get(`http://localhost:3000/label/createApart?name=${apartName.value}`, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear
+        apart.value = []
+        //repull
+        pullApart()
+        //show
+        apartShow.value = false
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+        apartShow.value = false
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
+}
+
+//room
 const roomShow = ref(false)
 const room = ref([])
 //拉取room label
 const pullRoomLabel = () => {
-  //get access
-  const access = localStorage.getItem('access').toString();
   axios.get('http://localhost:3000/label/room', {
     headers: {
-      Authorization: `Bearer ${access}`,
+      Authorization: `Bearer ${getAccess()}`,
     },
   }).then((res) => {
     if (res.data.code === 200) {
@@ -50,11 +113,9 @@ const pullRoomLabel = () => {
 const roomName = ref()
 const createRoom = () => {
   if (roomName.value) {
-    //get access
-    const access = localStorage.getItem('access').toString();
     axios.get(`http://localhost:3000/label/createRoom?name=${roomName.value}`, {
       headers: {
-        Authorization: `Bearer ${access}`,
+        Authorization: `Bearer ${getAccess()}`,
       },
     }).then((res) => {
       if (res.data.code === 200) {
@@ -80,17 +141,11 @@ const createRoom = () => {
     })
   }
 }
-//close
-const close_2 = (room) => {
-  rooms.value = rooms.value.filter((item) => item !== room )
-}
 //delete room
 const deleteRoom = (item) => {
-  //get access
-  const access = localStorage.getItem('access').toString();
   axios.get(`http://localhost:3000/label/deleteRoom?id=${item.id}`, {
     headers: {
-      Authorization: `Bearer ${access}`
+      Authorization: `Bearer ${getAccess()}`
     },
   }).then((res) => {
     if (res.data.code === 200) {
@@ -124,11 +179,9 @@ const payForm = reactive({
 })
 //删除标签
 const deletePay = (item) => {
-  //get access
-  const access = localStorage.getItem('access').toString();
   axios.get(`http://localhost:3000/pay-method/delete?id=${item.id}`, {
     headers: {
-      Authorization: `Bearer ${access}`,
+      Authorization: `Bearer ${getAccess()}`,
     },
   }).then((res) => {
     if (res.data.code === 200) {
@@ -152,11 +205,9 @@ const deletePay = (item) => {
 }
 //拉取支付方式
 const pullPayMethod = () => {
-  //获取access
-  const access = localStorage.getItem('access').toString();
   axios.get('http://localhost:3000/pay-method/pull', {
     headers: {
-      Authorization: `Bearer ${access}`,
+      Authorization: `Bearer ${getAccess()}`,
     },
   }).then((res) => {
     if (res.data.code === 200) {
@@ -169,16 +220,14 @@ const pullPayMethod = () => {
   })
 }
 //添加支付方式
-const createMenthod = () => {
-  //get access
-  const access = localStorage.getItem('access').toString();
+const createMethod = () => {
   if (payForm.name) {
     axios.post('http://localhost:3000/pay-method/create', {
       name: payForm.name,
       description: payForm.description,
     }, {
       headers: {
-        Authorization: `Bearer ${access}`,
+        Authorization: `Bearer ${getAccess()}`,
       },
     }).then((res) => {
       if (res.data.code === 200) {
@@ -209,14 +258,200 @@ const createMenthod = () => {
     })
   }
 }
+//room info labels
+const roomInfo = ref([])
+const info = ref(false)
+const infoForm = reactive({
+  type: '',
+  size: '',
+  towards: '',
+  lighting: '',
+  sanitation: '',
+})
+//拉取room info labels
+const pullInfo = () => {
+  axios.get('http://localhost:3000/label/pullInfo', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      res.data.data.forEach((item) => {
+        roomInfo.value.push(item)
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//添加room info label
+const createInfo = () => {
+  if (infoForm.type && infoForm.towards) {
+    axios.post('http://localhost:3000/label/createInfo', {
+      type: infoForm.type,
+      size: infoForm.size,
+      towards: infoForm.towards,
+      lighting: infoForm.lighting,
+      sanitation: infoForm.sanitation,
+    }, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear info list
+        roomInfo.value = []
+        //repull
+        pullInfo()
+        //info
+        info.value = false
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+        info.value = false
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
+}
+//删除room info labels
+const deleteInfo = (item) => {
+  axios.get(`http://localhost:3000/label/deleteInfo?id=${item.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message
+      })
+      //clear room info
+      roomInfo.value = []
+      //repull
+      pullInfo()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
+//拉取杂费labels
+const cost = ref(false)
+const costLabel = ref([])
+const costForm = reactive({
+  cost: '',
+  water: '',
+  net: '',
+  warm: '',
+  electric: '',
+})
+const pullCost = () => {
+  axios.get('http://localhost:3000/label/pullCost', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      res.data.data.forEach((item) => {
+        costLabel.value.push(item)
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//删除杂费
+const deleteCost = (item) => {
+  axios.get(`http://localhost:3000/label/deleteCost?id=${item.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear cost info
+      costLabel.value = []
+      //repull
+      pullCost()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//添加cost info labels
+const createCost = () => {
+  if (costForm.cost && costForm.net) {
+    axios.post('http://localhost:3000/label/createCost', {
+      cost: costForm.cost,
+      water: costForm.water,
+      net: costForm.net,
+      warm: costForm.warm,
+      electric: costForm.electric,
+    }, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear cost info
+        costLabel.value = []
+        //repull
+        pullCost()
+        //cost
+        cost.value = false
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+        //cost
+        cost.value = false
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  }
+}
+
 
 
 //om
 onMounted(() => {
+  //拉取apart
+  pullApart()
   //拉取支付方式
   pullPayMethod()
   //拉取room label
   pullRoomLabel()
+  //拉取room info labels
+  pullInfo()
+  //拉取cost info labels
+  pullCost()
 })
 </script>
 
@@ -235,13 +470,13 @@ onMounted(() => {
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_1(item)"
+                  @close="close(item)"
               >
-                {{ item }}
+                {{ item.name }}
               </el-tag>
             </div>
             <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
+              <el-button type="primary" icon="Plus" class="my-auto" @click="apartShow = true">添加</el-button>
             </div>
           </div>
           <!-- 房间配套 -->
@@ -278,19 +513,16 @@ onMounted(() => {
               户型
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in roomInfo"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteInfo(item)"
               >
-                {{ item }}
+                {{ item.type }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 面积 -->
@@ -299,19 +531,16 @@ onMounted(() => {
               面积
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in roomInfo"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteInfo(item)"
               >
-                {{ item }}
+                {{ item.size }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 朝向 -->
@@ -320,19 +549,16 @@ onMounted(() => {
               朝向
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in roomInfo"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteInfo(item)"
               >
-                {{ item }}
+                {{ item.towards }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 采光 -->
@@ -341,19 +567,16 @@ onMounted(() => {
               采光
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in roomInfo"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteInfo(item)"
               >
-                {{ item }}
+                {{ item.lighting }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 卫生 -->
@@ -364,17 +587,17 @@ onMounted(() => {
             </span>
             <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in roomInfo"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteInfo(item)"
               >
-                {{ item }}
+                {{ item.sanitation }}
               </el-tag>
             </div>
             <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
+              <el-button type="primary" icon="Plus" class="my-auto" @click="info = true">添加</el-button>
             </div>
           </div>
         </div>
@@ -393,19 +616,16 @@ onMounted(() => {
               房租
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in costLabel"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteCost(item)"
               >
-                {{ item }}
+                {{ item.cost }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 水费 -->
@@ -414,19 +634,16 @@ onMounted(() => {
               水费
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in costLabel"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteCost(item)"
               >
-                {{ item }}
+                {{ item.water }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 电费 -->
@@ -435,19 +652,16 @@ onMounted(() => {
               电费
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in costLabel"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteCost(item)"
               >
-                {{ item }}
+                {{ item.electric }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 采暖费 -->
@@ -456,19 +670,16 @@ onMounted(() => {
               采暖费
               <el-icon class="my-auto"><Warning /></el-icon>
             </span>
-            <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
+            <div class="w-full h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in costLabel"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteCost(item)"
               >
-                {{ item }}
+                {{ item.warm }}
               </el-tag>
-            </div>
-            <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
             </div>
           </div>
           <!-- 网费 -->
@@ -479,17 +690,17 @@ onMounted(() => {
             </span>
             <div style="width: calc(100% - 200px)" class="h-full px-4 relative flex bg-[#F7F9FA] message-card">
               <el-tag
-                  v-for="item in rooms"
+                  v-for="item in costLabel"
                   :key="item"
                   closable
                   class="my-auto mr-4"
-                  @close="close_2(item)"
+                  @close="deleteCost(item)"
               >
-                {{ item }}
+                {{ item.net }}
               </el-tag>
             </div>
             <div class="w-[100px] h-full relative flex justify-center">
-              <el-button type="primary" icon="Plus" class="my-auto">添加</el-button>
+              <el-button type="primary" icon="Plus" class="my-auto" @click="cost = true">添加</el-button>
             </div>
           </div>
         </div>
@@ -565,7 +776,7 @@ onMounted(() => {
         </el-form>
       </div>
       <template #footer>
-        <el-button icon="Select" type="primary" @click="createMenthod">确认添加</el-button>
+        <el-button icon="Select" type="primary" @click="createMethod">确认添加</el-button>
         <el-button icon="CircleClose" type="danger" @click="pay = false">取消</el-button>
       </template>
     </el-dialog>
@@ -594,6 +805,151 @@ onMounted(() => {
       <template #footer>
         <el-button @click="createRoom" icon="Select" type="primary">确认添加</el-button>
         <el-button @click="roomShow = false" icon="CircleClose" type="danger">取消</el-button>
+      </template>
+    </el-dialog>
+    <!-- create room info label -->
+    <el-dialog
+        v-model="info"
+        title="添加房间信息标签"
+        draggable
+        width="500px"
+    >
+      <div class="w-full h-auto relative block">
+        <el-form
+            v-model="infoForm"
+            label-width="auto"
+        >
+          <el-form-item label="户型">
+            <el-input
+                v-model="infoForm.type"
+                placeholder="请输入户型"
+                prefix-icon="OfficeBuilding"
+                clearable
+            />
+          </el-form-item>
+          <el-form-item label="面积">
+            <el-input
+                v-model="infoForm.size"
+                clearable
+                placeholder="请输入面积"
+                prefix-icon="Box"
+            />
+          </el-form-item>
+          <el-form-item label="采光">
+            <el-input
+                v-model="infoForm.lighting"
+                placeholder="请输入采光"
+                clearable
+                prefix-icon="ReadingLamp"
+            />
+          </el-form-item>
+          <el-form-item label="朝向">
+            <el-input
+                v-model="infoForm.towards"
+                placeholder="请输入朝向"
+                clearable
+                prefix-icon="Guide"
+            />
+          </el-form-item>
+          <el-form-item label="卫生">
+            <el-input
+                v-model="infoForm.sanitation"
+                clearable
+                placeholder="请输入卫生"
+                prefix-icon="ToiletPaper"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="createInfo" type="primary" icon="Select">确认添加</el-button>
+        <el-button @click="info = false" type="danger" icon="CircleClose">取消</el-button>
+      </template>
+    </el-dialog>
+    <!-- create cost info label -->
+    <el-dialog
+        v-model="cost"
+        title="添加杂费"
+        width="500px"
+        draggable
+    >
+      <div class="w-full h-auto relative block">
+        <el-form
+            label-width="auto"
+            v-model="costForm"
+        >
+          <el-form-item label="房租">
+            <el-input
+                placeholder="请输入房租"
+                prefix-icon="Ticket"
+                v-model="costForm.cost"
+                clearable
+            />
+          </el-form-item>
+          <el-form-item label="水费">
+            <el-input
+                placeholder="请输入水费"
+                prefix-icon="Coffee"
+                v-model="costForm.water"
+                clearable
+            />
+          </el-form-item>
+          <el-form-item label="电费">
+            <el-input
+                placeholder="请输入电费"
+                prefix-icon="Cpu"
+                v-model="costForm.electric"
+                clearable
+            />
+          </el-form-item>
+          <el-form-item label="取暖费">
+            <el-input
+                placeholder="请输入取暖费"
+                prefix-icon="Sunrise"
+                v-model="costForm.warm"
+                clearable
+            />
+          </el-form-item>
+          <el-form-item label="网费">
+            <el-input
+                placeholder="请输入网费"
+                prefix-icon="Printer"
+                v-model="costForm.net"
+                clearable
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="createCost" type="primary" icon="Select">确认添加</el-button>
+        <el-button @click="cost = false" type="danger" icon="CircleClose">取消</el-button>
+      </template>
+    </el-dialog>
+    <!-- create apart label -->
+    <el-dialog
+        draggable
+        v-model="apartShow"
+        width="500px"
+        title="添加公寓标签"
+    >
+      <div class="w-full h-auto relative block">
+        <el-form
+            label-width="auto"
+            v-model="apartName"
+        >
+          <el-form-item label="公寓标签">
+            <el-input
+                placeholder="请输入公寓标签"
+                v-model="apartName"
+                prefix-icon="OfficeBuilding"
+                clearable
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="createApart" type="primary" icon="Select">确认添加</el-button>
+        <el-button @click="apartShow = false" type="danger" icon="CircleClose">取消</el-button>
       </template>
     </el-dialog>
   </div>
