@@ -44,6 +44,9 @@ const change = (to) => {
     case '/attribute':
       router.push(to)
           break;
+    case '/rooms':
+      router.push(to)
+          break;
   }
 }
 //持久化菜单高亮
@@ -62,6 +65,9 @@ const initMenu = () => {
       activeDefault.value = route.fullPath
           break;
     case '/attribute':
+      activeDefault.value = route.fullPath
+          break;
+    case '/rooms':
       activeDefault.value = route.fullPath
           break;
   }
@@ -119,9 +125,9 @@ watch(() => route.fullPath, () => {
           <el-icon><OfficeBuilding /></el-icon>
           <span>公寓管理</span>
         </el-menu-item>
-        <el-menu-item index="3-2">
+        <el-menu-item index="/rooms">
           <el-icon><HomeFilled /></el-icon>
-          <span>房间管理</span>
+          <span>客房管理</span>
         </el-menu-item>
         <el-menu-item index="/attribute">
           <el-icon><More /></el-icon>

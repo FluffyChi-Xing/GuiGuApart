@@ -9,6 +9,7 @@ import JobManage from "@/views/job/JobManage.vue";
 import LookAndBook from "@/views/looking&book/LookAndBook.vue";
 import AttributeManage from "@/views/attribute/AttributeManage.vue";
 import axios from "axios";
+import RoomManage from "@/views/roomManage/RoomManage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -64,7 +65,15 @@ const router = createRouter({
           meta: {
             title: '尚庭公寓 | 属性管理'
           },
-        }
+        },
+        {
+          path: '/rooms',
+          name: '客房管理',
+          component: RoomManage,
+          meta: {
+            title: '尚庭公寓 | 客房管理'
+          },
+        },
       ]
     },
     {

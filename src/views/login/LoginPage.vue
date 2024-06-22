@@ -71,6 +71,8 @@ const loginSubmit = () => {
           //存放access & refresh
           localStorage.setItem('access', res.data.access);
           localStorage.setItem('refresh', res.data.refresh);
+          //记录用户数据
+          localStorage.setItem('default_user', loginForm.username);
           router.replace('/')
         } else {
           ElMessage({
