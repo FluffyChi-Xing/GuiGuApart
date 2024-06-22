@@ -9,8 +9,8 @@ import {ElMessage} from "element-plus";
 
 //pagination
 const pagination = reactive({
-  pageCount: 10,
-  total: 50,
+  total: 0,
+  size: 5,
   hide: true,
 })
 
@@ -41,7 +41,7 @@ const table = reactive({
     },
     {
       label: '公寓名',
-      prop: 'apartment_name',
+      prop: 'name',
       width: '200px'
     },
     {
@@ -91,6 +91,10 @@ const getAccess = () => {
   return localStorage.getItem('access').toString();
 }
 
+//current
+const current = ref()
+
+
 //分页拉取数据
 //pageNo & pageSize
 const pageNo = ref(1)
@@ -102,6 +106,7 @@ const pullAll = () => {
     },
   }).then((res) => {
     if (res.data.code === 200) {
+      pagination.total = res.data.count;
       res.data.data.forEach((item) => {
         switch (item.status) {
           case 1:
@@ -133,6 +138,42 @@ const refresh = () => {
   //re pull
   pullAll()
 }
+//search room
+const searchRoom = () => {
+  if (value.value) {
+    axios.get(`http://localhost:3000/rooms/search?name=${value.value}`, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear
+        data.value = []
+        data.value = res.data.data
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请输入要搜索的客房名称',
+    })
+  }
+}
+
+
+
+
 
 //create room
 const room = ref(false)
@@ -141,14 +182,23 @@ const roomForm = reactive({
   roomNo: 0,
   cost: 0,
   apart_id: 0,
+  lease_id: 0,
+  pay_method: 0,
+  label_id: 0,
 })
 const apart = ref([])
+const label = ref([])
+const lease = ref([])
+const pay = ref([])
 const submitRoom = () => {
   axios.post('http://localhost:3000/rooms/create', {
     room_id: roomForm.roomNo,
     room_name: roomForm.roomName,
     room_cost: roomForm.cost,
     apart_id: roomForm.apart_id,
+    lease_id: roomForm.lease_id,
+    pay_method: roomForm.pay_method,
+    label_id: roomForm.label_id,
   }, {
     headers: {
       Authorization: `Bearer ${getAccess()}`,
@@ -175,8 +225,8 @@ const submitRoom = () => {
     console.log(err);
   })
 }
-const createRoom = () => {
-  room.value = true
+//init apart
+const initApart = () => {
   axios.get('http://localhost:3000/apartment/get', {
     headers: {
       Authorization: `Bearer ${getAccess()}`,
@@ -193,6 +243,60 @@ const createRoom = () => {
   }).catch((err) => {
     console.log(err)
   })
+}
+//init lease
+const initLease = () => {
+  axios.get('http://localhost:3000/rooms/lease-relation', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      lease.value = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//init pay method
+const initPay = () => {
+  axios.get('http://localhost:3000/rooms/method', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      pay.value = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//init label
+const initLabel = () => {
+  axios.get('http://localhost:3000/rooms/label-relation', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      label.value = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+
+const createRoom = () => {
+  room.value = true
+  //init apartment
+  initApart();
+  //init lease
+  initLease()
+  //init pay method
+  initPay()
+  //init label
+  initLabel()
 }
 
 //om
@@ -213,13 +317,13 @@ onMounted(() => {
           <div class="w-auto h-full relative flex">
             <el-input
                 v-model="value"
-                placeholder="请输入房间序号..."
+                placeholder="请输入房间名称..."
                 prefix-icon="Warning"
                 clearable
                 style="width: 240px"
                 class="h-8 my-auto mr-4"
             />
-            <el-button type="primary" icon="Search" class="my-auto">搜索</el-button>
+            <el-button @click="searchRoom" type="primary" icon="Search" class="my-auto">搜索</el-button>
           </div>
           <!-- refresh button -->
           <el-button @click="refresh" type="primary" icon="Refresh" class="my-auto ml-4">刷新</el-button>
@@ -249,8 +353,8 @@ onMounted(() => {
         <div class="w-full h-auto relative flex justify-center">
           <PaginationComponent
               :hide="pagination.hide"
-              :page-count="pagination.pageCount"
               :total="pagination.total"
+              :page-size="pagination.size"
           />
         </div>
       </div>
@@ -295,6 +399,19 @@ onMounted(() => {
                 prefix-icon="Ticket"
             />
           </el-form-item>
+          <el-form-item label="支付方式">
+            <el-select
+                v-model="roomForm.pay_method"
+                placeholder="请选择支付方式"
+            >
+              <el-option
+                  v-for="item in pay"
+                  :key="item"
+                  :label="item.name"
+                  :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="所属公寓">
             <el-select
                 v-model="roomForm.apart_id"
@@ -305,6 +422,32 @@ onMounted(() => {
                   :key="item"
                   :label="item.name"
                   :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="租期">
+            <el-select
+                v-model="roomForm.lease_id"
+                placeholder="请选择租期"
+            >
+              <el-option
+                  v-for="item in lease"
+                  :key="item"
+                  :label="item.delay + item.lease_unit"
+                  :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="宣传tag">
+            <el-select
+                v-model="roomForm.label_id"
+                placeholder="请选择tags"
+            >
+              <el-option
+                  v-for="item in label"
+                  :key="item"
+                  :value="item.id"
+                  :label="item.name"
               />
             </el-select>
           </el-form-item>

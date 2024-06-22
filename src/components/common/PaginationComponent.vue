@@ -7,6 +7,7 @@ const setting = defineProps({
   small: Boolean,
   hide: Boolean,
   disabled: Boolean,
+  size: Number,
   //function
   currentChange: () => {},
 })
@@ -23,6 +24,7 @@ const setting = defineProps({
         :small="setting.small"
         :hide-on-single-page="setting.hide"
         :disabled="setting.disabled"
+        :default-page-size="setting.size"
         @current-change="setting.currentChange"
     />
   </div>
