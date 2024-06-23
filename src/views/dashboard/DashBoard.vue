@@ -4,6 +4,7 @@ import {ArrowRight, Warning} from "@element-plus/icons-vue";
 import * as echarts from 'echarts';
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 
 //router
 const router = useRouter()
@@ -73,37 +74,6 @@ const quick = ref([
 //echarts
 //color
 const color = localStorage.getItem('primary_color')
-//om
-onMounted(() => {
-  let charts = echarts.init(document.getElementById('charts'))
-  const option = {
-    xAxis: {
-      type: 'category',
-      data: ['A', 'B', 'C']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        data: [120, 200, 150],
-        type: 'line'
-      }
-    ],
-    grid: {
-      top: '10%',
-      left: '10%',
-      right: '10%',
-      bottom: '10%'
-    },
-    title: {
-      text: '预约数量',
-      x: 'left',
-    },
-    color: color,
-  };
-  charts.setOption(option);
-})
 //jump function
 const jump = (item) => {
   switch (item.path) {
@@ -139,8 +109,76 @@ const quickJump = (item) => {
 }
 
 //pull data
-//rooms data
-const rooms = ref()
+//get access
+const getAccess = () => {
+  return localStorage.getItem('access').toString();
+}
+//count rooms
+const countRoom = () => {
+  axios.get('http://localhost:3000/rooms/count', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      messageCard.value[1].number = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//count apartment
+const countApart = () => {
+  axios.get('http://localhost:3000/apartment/count', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      messageCard.value[0].number = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
+
+
+//om
+onMounted(() => {
+  let charts = echarts.init(document.getElementById('charts'))
+  const option = {
+    xAxis: {
+      type: 'category',
+      data: ['A', 'B', 'C']
+    },
+    yAxis: {
+      type: 'value'
+    },
+    series: [
+      {
+        data: [120, 200, 150],
+        type: 'line'
+      }
+    ],
+    grid: {
+      top: '10%',
+      left: '10%',
+      right: '10%',
+      bottom: '10%'
+    },
+    title: {
+      text: '预约数量',
+      x: 'left',
+    },
+    color: color,
+  };
+  charts.setOption(option);
+  //count rooms
+  countRoom()
+  //count apartment
+  countApart()
+})
 </script>
 
 <template>
