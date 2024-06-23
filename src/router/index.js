@@ -10,6 +10,7 @@ import LookAndBook from "@/views/looking&book/LookAndBook.vue";
 import AttributeManage from "@/views/attribute/AttributeManage.vue";
 import axios from "axios";
 import RoomManage from "@/views/roomManage/RoomManage.vue";
+import ApartPage from "@/views/apartment/ApartPage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -72,6 +73,14 @@ const router = createRouter({
           component: RoomManage,
           meta: {
             title: '尚庭公寓 | 客房管理'
+          },
+        },
+        {
+          path: '/apart',
+          name: '公寓管理',
+          component: ApartPage,
+          meta: {
+            title: '尚庭公寓 | 公寓管理',
           },
         },
       ]

@@ -4,7 +4,6 @@ import {ArrowRight, Warning} from "@element-plus/icons-vue";
 import * as echarts from 'echarts';
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 
 //router
 const router = useRouter()
@@ -16,7 +15,7 @@ const messageCard = ref([
     title: '公寓楼总览',
     suffix: '栋',
     number: 10,
-    path: '/apartment'
+    path: '/apart'
   },
   {
     title: '房间信息总览',
@@ -34,7 +33,7 @@ const messageCard = ref([
     title: '租约信息总览',
     suffix: '条',
     number: 10,
-    path: '/bookers'
+    path: '/look'
   },
 ])
 //alert card
@@ -63,11 +62,11 @@ const quick = ref([
   },
   {
     name: '公寓管理',
-    path: '/apartment'
+    path: '/apart'
   },
   {
-    name: '预约管理',
-    path: '/booking'
+    name: '看房预约',
+    path: '/look'
   },
 ])
 
@@ -111,11 +110,29 @@ const jump = (item) => {
     case '/users':
       router.push(item.path)
           break;
+    case '/look':
+      router.push(item.path)
+          break;
+    case '/apart':
+      router.push(item.path)
+          break;
+    case '/rooms':
+      router.push(item.path)
+          break;
   }
 }
 const quickJump = (item) => {
   switch (item.path) {
     case '/users':
+      router.push(item.path)
+          break;
+    case '/look':
+      router.push(item.path)
+          break;
+    case '/':
+      router.push(item.path)
+          break;
+    case '/apart':
       router.push(item.path)
           break;
   }

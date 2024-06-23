@@ -9,7 +9,7 @@ const setting = defineProps({
   disabled: Boolean,
   size: Number,
   //function
-  currentChange: () => {},
+  currentChange: function () {},
 })
 </script>
 

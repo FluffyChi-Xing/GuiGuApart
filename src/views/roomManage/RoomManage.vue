@@ -66,11 +66,13 @@ const operation = [
     type: 'success',
     size: 'small',
     message: '上架',
+    controller: () => reloadRoom(),
   },
   {
     type: 'danger',
     size: 'small',
     message: '下架',
+    controller: () => frozenRoom(),
   },
   {
     type: 'primary',
@@ -93,6 +95,70 @@ const getAccess = () => {
 
 //current
 const current = ref()
+const currentChange = (item) => {
+  current.value = item
+}
+//pagination change
+const changePage = (current) => {
+  pageNo.value = current
+  //clear
+  data.value = []
+  //re pull
+  pullAll()
+}
+//frozen room
+const frozenRoom = () => {
+  axios.get(`http://localhost:3000/rooms/frozen?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//reload room
+const reloadRoom = () => {
+  axios.get(`http://localhost:3000/rooms/reload?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+//delete room
 
 
 //分页拉取数据
@@ -299,6 +365,7 @@ const createRoom = () => {
   initLabel()
 }
 
+
 //om
 onMounted(() => {
   pullAll()
@@ -347,6 +414,7 @@ onMounted(() => {
               :border="table.border"
               :stripe="table.stripe"
               :fit="table.fit"
+              :current_change="currentChange"
           />
         </div>
         <!-- footer -->
@@ -355,6 +423,7 @@ onMounted(() => {
               :hide="pagination.hide"
               :total="pagination.total"
               :page-size="pagination.size"
+              :current-change="changePage"
           />
         </div>
       </div>
@@ -362,6 +431,7 @@ onMounted(() => {
     <!-- copy right -->
     <CopyRight />
     <!-- dialogs -->
+    <!-- create room dialog -->
     <el-dialog
         width="500px"
         title="添加客房"
@@ -458,6 +528,7 @@ onMounted(() => {
         <el-button @click="room = false" type="danger" icon="CircleClose">取消</el-button>
       </template>
     </el-dialog>
+    <!-- update room dialog -->
   </div>
 </template>
 

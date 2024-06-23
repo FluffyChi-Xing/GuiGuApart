@@ -2,6 +2,9 @@
 import { reactive, ref } from "vue";
 import {Delete, Download, Plus, ZoomIn} from "@element-plus/icons-vue";
 import type { UploadFile } from 'element-plus'
+import axios from "axios";
+import {ElMessage} from "element-plus";
+import { onMounted } from "vue";
 
 //user information
 const information = reactive({
@@ -31,6 +34,43 @@ const handlePictureCardPreview = (file: UploadFile) => {
 const handleDownload = (file: UploadFile) => {
   console.log(file)
 }
+
+//get user id
+const getUserId = () => {
+  return localStorage.getItem('default_user')
+}
+//get access
+const getAccess = () => {
+  return localStorage.getItem('access').toString()
+}
+//get user info by id
+const getUser = () => {
+  axios.get(`http://localhost:3000/employee/searchId?id=${getUserId()}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      information.username = res.data.data.username;
+      information.password = res.data.data.password;
+      information.phone = res.data.data.phone;
+      information.email = res.data.data.email;
+      information.isRoot = res.data.data.status;
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err)
+  })
+}
+
+//om
+onMounted(() => {
+  getUser()
+})
 </script>
 
 <template>

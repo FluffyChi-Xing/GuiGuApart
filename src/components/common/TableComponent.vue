@@ -65,7 +65,7 @@ const props = defineProps({
             :type="item.type"
             :disabled="item.disabled"
             :size="item.size"
-            @click="item.function"
+            @click="item.controller"
         >
           {{ item.message }}
         </el-button>
