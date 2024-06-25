@@ -151,7 +151,7 @@ watch(() => route.fullPath, () => {
         </el-menu-item>
         <el-menu-item index="4-2">
           <el-icon><Management /></el-icon>
-          <span>预约管理</span>
+          <span>租约管理</span>
         </el-menu-item>
       </el-sub-menu>
     </el-menu>

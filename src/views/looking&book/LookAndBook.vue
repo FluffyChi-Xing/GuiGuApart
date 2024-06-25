@@ -3,65 +3,12 @@ import { reactive,ref } from "vue";
 import CopyRight from "@/components/common/CopyRight.vue";
 import PaginationComponent from "@/components/common/PaginationComponent.vue";
 import TableComponent from "@/components/common/TableComponent.vue";
-
-//pagination setting
-const pagination = reactive({
-  pageCount: 10,
-  hide: true,
-  total: 50,
-})
+import axios from "axios";
+import { onMounted } from "vue";
+import {ElMessage} from "element-plus";
 
 //table data setting
-const data = ref([
-  {
-    id: 1,
-    name: '张三',
-    province: '列奥宁',
-    phone: 12313131212,
-    city: '答利安',
-    district: '甘井子',
-    apartment: '汤城一品A座1209',
-    value: 'noavbisavbsovbsao son sp',
-    time: '2024-09-18',
-    status: '预约中'
-  },
-  {
-    id: 2,
-    name: '张三',
-    province: '列奥宁',
-    phone: 12313131212,
-    city: '答利安',
-    district: '甘井子',
-    apartment: '汤城一品A座1209',
-    value: 'noavbisavbsovbsao son sp',
-    time: '2024-09-18',
-    status: '预约中'
-  },
-  {
-    id: 3,
-    name: '张三',
-    province: '列奥宁',
-    phone: 12313131212,
-    city: '答利安',
-    district: '甘井子',
-    apartment: '汤城一品A座1209',
-    value: 'noavbisavbsovbsao son sp',
-    time: '2024-09-18',
-    status: '预约中'
-  },
-  {
-    id: 4,
-    name: '张三',
-    province: '列奥宁',
-    phone: 12313131212,
-    city: '答利安',
-    district: '甘井子',
-    apartment: '汤城一品A座1209',
-    value: 'noavbisavbsovbsao son sp',
-    time: '2024-09-18',
-    status: '预约中'
-  },
-])
+const data = ref([])
 const table = reactive({
   label: [
     {
@@ -71,7 +18,7 @@ const table = reactive({
     },
     {
       label: '姓名',
-      prop: 'name',
+      prop: 'username',
       width: '200px'
     },
     {
@@ -107,7 +54,7 @@ const table = reactive({
     },
     {
       label: '预约时间',
-      prop: 'time',
+      prop: 'create_time',
       width: '200px'
     },
     {
@@ -131,6 +78,7 @@ const table = reactive({
       type: 'info',
       size: 'small',
       message: '批准',
+      controller: () => acceptBook(),
     },
   ],
   stripe: true,
@@ -142,9 +90,129 @@ const table = reactive({
   canEdit: true,
   isFixed: 'right',
 })
+//pagination
+const pagination = reactive({
+  hide: true,
+  total: 0,
+  size: 5,
+})
 
 //search
 const value = ref()
+
+//get access
+const getAccess = () => {
+  return localStorage.getItem('access').toString();
+}
+//base page settings
+const pageNo = ref(1)
+const pageSize = 5;
+
+//pull data
+const pullAll = () => {
+  axios.get(`http://localhost:3000/book/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      pagination.total = res.data.count;
+      res.data.data.forEach((item) => {
+        if (item.status === 1) {
+          item.status = '预约中'
+        }
+        if (item.status === 0) {
+          item.status = '已批准'
+        }
+        if (item.status === -1) {
+          item.status = '已拒绝'
+        }
+        data.value.push(item);
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//refresh
+const refresh = () => {
+  //clear
+  data.value = [];
+  //re pull
+  pullAll();
+}
+//search book info
+const searchBook = () => {
+  if (value.value) {
+    axios.get(`http://localhost:3000/book/search?username=${value.value}`, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear
+        data.value = []
+        //re pull
+        pullAll()
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '用户名不可为空',
+    })
+  }
+}
+
+//current
+const current = ref()
+const selectOne = (select) => {
+  current.value = select;
+}
+//accept book
+const acceptBook = () => {
+  axios.get(`http://localhost:3000/book/access?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
+
+//om
+onMounted(() => {
+  //pull data
+  pullAll()
+})
 </script>
 
 <template>
@@ -163,10 +231,10 @@ const value = ref()
               style="width: 240px"
               class="my-auto"
           />
-          <el-button type="primary" class="ml-4 my-auto" icon="Search">搜索</el-button>
+          <el-button @click="searchBook" type="primary" class="ml-4 my-auto" icon="Search">搜索</el-button>
         </div>
         <!-- refresh -->
-        <el-button type="primary" icon="Refresh" class="ml-4 my-auto">刷新</el-button>
+        <el-button @click="refresh" type="primary" icon="Refresh" class="ml-4 my-auto">刷新</el-button>
       </div>
       <!-- table body -->
       <div style="height: calc(100% - 112px)" class="w-full relative block">
@@ -182,14 +250,15 @@ const value = ref()
             :operate-width="table.width"
             :multiple="table.multiple"
             :is-fixed="table.isFixed"
+            :current_change="selectOne"
         />
       </div>
       <!-- pagination -->
       <div class="w-full h-14 relative flex justify-center">
         <PaginationComponent
-            :total="pagination.total"
+            :size="pagination.size"
             :hide="pagination.hide"
-            :page-count="pagination.pageCount"
+            :total="pagination.total"
         />
       </div>
     </div>
