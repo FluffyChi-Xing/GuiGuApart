@@ -53,6 +53,9 @@ const change = (to) => {
     case '/client':
       router.push(to)
           break;
+    case '/indenture':
+      router.push(to)
+          break;
   }
 }
 //持久化菜单高亮
@@ -80,6 +83,9 @@ const initMenu = () => {
       activeDefault.value = route.fullPath
           break;
     case '/client':
+      activeDefault.value = route.fullPath
+          break;
+    case '/indenture':
       activeDefault.value = route.fullPath
           break;
   }
@@ -159,7 +165,7 @@ watch(() => route.fullPath, () => {
           <el-icon><Clock /></el-icon>
           <span>看房预约管理</span>
         </el-menu-item>
-        <el-menu-item index="4-2">
+        <el-menu-item index="/indenture">
           <el-icon><Management /></el-icon>
           <span>租约管理</span>
         </el-menu-item>

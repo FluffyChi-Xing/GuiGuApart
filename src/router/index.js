@@ -12,6 +12,7 @@ import axios from "axios";
 import RoomManage from "@/views/roomManage/RoomManage.vue";
 import ApartPage from "@/views/apartment/ApartPage.vue";
 import ClientPage from "@/views/ClientManage/ClientPage.vue";
+import IndenturePage from "@/views/indenture/IndenturePage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -92,6 +93,14 @@ const router = createRouter({
             title: '尚庭公寓 | 客户管理',
           },
         },
+        {
+          path: '/indenture',
+          name: '租约管理',
+          component: IndenturePage,
+          meta: {
+            title: '尚庭公寓 | 租约管理'
+          }
+        }
       ]
     },
     {

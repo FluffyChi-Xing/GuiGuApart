@@ -6,6 +6,7 @@ import TableComponent from "@/components/common/TableComponent.vue";
 import axios from "axios";
 import { onMounted } from "vue";
 import {ElMessage} from "element-plus";
+import {getAccess} from "@/utils/getAccess.js";
 
 //table data setting
 const data = ref([])
@@ -102,10 +103,6 @@ const pagination = reactive({
 //search
 const value = ref()
 
-//get access
-const getAccess = () => {
-  return localStorage.getItem('access').toString();
-}
 //base page settings
 const pageNo = ref(1)
 const pageSize = 5;
