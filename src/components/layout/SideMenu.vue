@@ -7,7 +7,7 @@ import {
   Management,
   More,
   Odometer,
-  OfficeBuilding,
+  OfficeBuilding, Service,
   Setting, User
 } from "@element-plus/icons-vue";
 import { useCounterStore } from "@/stores/counter.js";
@@ -50,6 +50,9 @@ const change = (to) => {
     case '/apart':
       router.push(to)
           break;
+    case '/client':
+      router.push(to)
+          break;
   }
 }
 //持久化菜单高亮
@@ -74,6 +77,9 @@ const initMenu = () => {
       activeDefault.value = route.fullPath
           break;
     case '/apart':
+      activeDefault.value = route.fullPath
+          break;
+    case '/client':
       activeDefault.value = route.fullPath
           break;
   }
@@ -114,12 +120,16 @@ watch(() => route.fullPath, () => {
           <span>系统管理</span>
         </template>
         <el-menu-item index="/users">
-          <el-icon><User /></el-icon>
+          <el-icon><Service /></el-icon>
           <span>用户管理</span>
         </el-menu-item>
         <el-menu-item index="/job">
           <el-icon><List /></el-icon>
           <span>岗位管理</span>
+        </el-menu-item>
+        <el-menu-item index="/client">
+          <el-icon><User /></el-icon>
+          <span>客户管理</span>
         </el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="3">

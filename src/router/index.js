@@ -11,6 +11,7 @@ import AttributeManage from "@/views/attribute/AttributeManage.vue";
 import axios from "axios";
 import RoomManage from "@/views/roomManage/RoomManage.vue";
 import ApartPage from "@/views/apartment/ApartPage.vue";
+import ClientPage from "@/views/ClientManage/ClientPage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -81,6 +82,14 @@ const router = createRouter({
           component: ApartPage,
           meta: {
             title: '尚庭公寓 | 公寓管理',
+          },
+        },
+        {
+          path: '/client',
+          name: '客户管理',
+          component: ClientPage,
+          meta: {
+            title: '尚庭公寓 | 客户管理',
           },
         },
       ]

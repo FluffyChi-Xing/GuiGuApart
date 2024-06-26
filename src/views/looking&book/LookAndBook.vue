@@ -66,13 +66,15 @@ const table = reactive({
   operation: [
     {
       type: 'primary',
-      message: '修改',
+      message: '拒绝',
       size: 'small',
+      controller: () => refuseBook(),
     },
     {
       type: 'danger',
       size: 'small',
       message: '删除',
+      controller: () => deleteBook(),
     },
     {
       type: 'info',
@@ -206,6 +208,67 @@ const acceptBook = () => {
     console.log(err);
   })
 }
+//拒绝预约
+const refuseBook = () => {
+  axios.get(`http://localhost:3000/book/refuse?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//删除预约
+const deleteBook = () => {
+  axios.get(`http://localhost:3000/book/delete?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
+//change page
+const changePage = (current) => {
+  pageNo.value = current
+  //clear
+  data.value = []
+  //re pull
+  pullAll()
+}
 
 
 //om
@@ -259,6 +322,7 @@ onMounted(() => {
             :size="pagination.size"
             :hide="pagination.hide"
             :total="pagination.total"
+            :current-change="changePage"
         />
       </div>
     </div>
