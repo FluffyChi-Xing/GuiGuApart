@@ -89,16 +89,6 @@ const table = reactive({
   ],
   operate: [
     {
-      type: 'primary',
-      message: '修改',
-      size: 'small',
-    },
-    {
-      type: 'danger',
-      size: 'small',
-      message: '删除',
-    },
-    {
       type: 'info',
       size: 'small',
       message: '冻结',
@@ -116,7 +106,7 @@ const table = reactive({
   maxHeight: '300',
   canEdit: true,
   isFixed: 'right',
-  width: '280px',
+  width: '150px',
   stripe: true,
   border: true,
 })
@@ -279,6 +269,73 @@ const downloadExcel = async () => {
   });
 }
 
+//create employee
+//dept
+const dept = [
+  {
+    label: '管理员',
+    value: 0,
+  },
+  {
+    label: '销售',
+    value: 1
+  }
+]
+//submit
+const submitEmployee = () => {
+  if (createUser.dept && createUser.username) {
+    axios.post('http://localhost:3000/employee/create', {
+      username: createUser.username,
+      password: createUser.password,
+      phone: createUser.phone,
+      email: createUser.email,
+      dept: createUser.dept,
+    }, {
+      headers: {
+        Authorization:`Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear
+        data.value = []
+        //re pull
+        pullAll();
+        //show
+        dialogShow.value = false
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+        dialogShow.value = false
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '参数不能为空'
+    })
+    dialogShow.value = false
+  }
+}
+//change page
+const changePage = (current) => {
+  pageNo.value = current
+  //clear
+  data.value = []
+  //re pull
+  pullAll()
+}
+
+
+
+
 //om
 onMounted(() => {
   //pull all data
@@ -332,6 +389,7 @@ onMounted(() => {
             :total="pages.total"
             :hide="pages.hide"
             :page-size="pages.pageSize"
+            :current-change="changePage"
         />
       </div>
     </div>
@@ -399,18 +457,10 @@ onMounted(() => {
               />
             </el-select>
           </el-form-item>
-          <el-form-item label="权限">
-            <el-radio-group
-                v-model="createUser.isRoot"
-            >
-              <el-radio value="1">用户</el-radio>
-              <el-radio value="2">管理员</el-radio>
-            </el-radio-group>
-          </el-form-item>
         </el-form>
       </div>
       <template #footer>
-        <el-button type="primary" icon="Select">确认</el-button>
+        <el-button @click="submitEmployee" type="primary" icon="Select">确认</el-button>
         <el-button @click="dialogShow = false" type="danger" icon="CircleClose">取消</el-button>
       </template>
     </el-dialog>

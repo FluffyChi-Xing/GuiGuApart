@@ -7,6 +7,7 @@ import { onMounted } from "vue";
 import axios from "axios";
 import {getAccess} from "@/utils/getAccess.js";
 import {ElMessage} from "element-plus";
+import {makeExcel} from "@/utils/makeExcel.js";
 
 //pagination
 const pagination = reactive({
@@ -206,6 +207,59 @@ const reloadUser = () => {
   })
 }
 
+//download excel
+//columns
+const columns = [
+  {
+    header: '序号',
+    key: 'id',
+    width: 20
+  },
+  {
+    header: '用户名',
+    key: 'username',
+    width: 20
+  },
+  {
+    header: '密码',
+    key: 'password',
+    width: 30
+  },
+  {
+    header: '电话号码',
+    key: 'phone',
+    width: 20
+  },
+  {
+    header: '状态',
+    key: 'status',
+    width: 20
+  }
+]
+const downloadExcel = async () => {
+  const sheetName = 'client'
+  const response = await makeExcel(sheetName, columns, data.value)
+  const blob = new Blob([response.buffer]);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${sheetName}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.addEventListener('click', () => {
+    link.remove();
+  });
+}
+
+//change page
+const changePage = (current) => {
+  pageNo.value = current
+  //clear
+  data.value = []
+  //re pull
+  pullAll()
+}
+
 
 //om
 onMounted(() => {
@@ -235,6 +289,10 @@ onMounted(() => {
         </div>
         <!-- refresh -->
         <el-button @click="refresh" type="primary" icon="Refresh" class="my-auto ml-4">刷新</el-button>
+        <!-- download excel -->
+        <div class="w-auto h-full relative flex justify-center ml-auto">
+          <el-button @click="downloadExcel" type="primary" icon="Document" class="my-auto">导出Excel</el-button>
+        </div>
       </div>
       <!-- table body -->
       <div style="height: calc(100% - 112px)" class="w-full relative block">
@@ -259,6 +317,7 @@ onMounted(() => {
             :total="pagination.total"
             :page-size="pagination.pageSize"
             :hide="pagination.hide"
+            :current-change="changePage"
         />
       </div>
     </div>

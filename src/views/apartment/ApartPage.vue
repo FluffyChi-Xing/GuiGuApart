@@ -92,7 +92,8 @@ const operation = ref([
   {
     type: 'info',
     message: '下架',
-    size: 'small'
+    size: 'small',
+    controller: () => frozenApart(),
   },
   {
     type: 'danger',
@@ -119,6 +120,7 @@ const pullAll = () => {
     },
   }).then((res) => {
     if (res.data.code === 200) {
+      pagination.total = res.data.count;
       res.data.data.forEach((item) => {
         switch (item.status) {
           case 1:
@@ -217,6 +219,84 @@ const submitApart = () => {
   }
 }
 
+//change page
+const changePage = (current) => {
+  pageNo.value = current
+  //clear
+  data.value = []
+  //re pull
+  pullAll()
+}
+//search apartment
+const searchApart = () => {
+  if (value.value) {
+    axios.get(`http://localhost:3000/apartment/search?name=${value.value}`, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        //clear
+        data.value = []
+        data.value = res.data.data;
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请输入公寓名',
+    })
+  }
+}
+
+//select one
+const current = ref()
+const selectOne = (item) => {
+  current.value = item
+}
+
+//apartment frozen
+const frozenApart = () => {
+  axios.get(`http://localhost:3000/apartment/frozen?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
+
+
+
+
 //om
 onMounted(() => {
   pullAll()
@@ -237,9 +317,9 @@ onMounted(() => {
               prefix-icon="OfficeBuilding"
               clearable
               class="mr-4 my-auto"
-              style="height: 32px"
+              style="height: 32px;width: 240px"
           />
-          <el-button type="primary" icon="Search" class="my-auto">搜索</el-button>
+          <el-button @click="searchApart" type="primary" icon="Search" class="my-auto">搜索</el-button>
         </div>
         <!-- refresh button -->
         <el-button @click="refresh" type="primary" icon="Refresh" class="my-auto">刷新</el-button>
@@ -262,6 +342,7 @@ onMounted(() => {
             :is-fixed="table.isFixed"
             :operate="operation"
             :operate-width="table.width"
+            :current_change="selectOne"
         />
       </div>
       <!-- pagination -->
@@ -270,6 +351,7 @@ onMounted(() => {
             :total="pagination.total"
             :hide="pagination.hide"
             :size="pagination.size"
+            :current-change="changePage"
         />
       </div>
     </div>
