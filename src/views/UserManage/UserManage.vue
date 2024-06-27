@@ -4,58 +4,51 @@ import { ref } from "vue";
 import TableComponent from "@/components/common/TableComponent.vue";
 import PaginationComponent from "@/components/common/PaginationComponent.vue";
 import CopyRight from "@/components/common/CopyRight.vue";
+import { onMounted } from "vue";
+import axios from "axios";
+import {getAccess} from "@/utils/getAccess.js";
+import {ElMessage} from "element-plus";
+import {makeExcel} from "@/utils/makeExcel.js";
 
 //table data
-const data = [
+const columns = [
   {
-    id: 1,
-    name: '张三',
-    password: 122131321,
-    phone: 13144442453,
-    dept: '经理',
-    email: 'sqbdiwd@gmail.com',
+    header: '序号',
+    key: 'id',
+    width: 20
   },
   {
-    id: 2,
-    name: '李四',
-    password: 122131321,
-    phone: 13144442453,
-    dept: '销售',
-    email: 'sqbdiwd@gmail.com',
+    header: '员工名',
+    key: 'username',
+    width: 30
   },
   {
-    id: 3,
-    name: '王五',
-    password: 122131321,
-    phone: 13144442453,
-    dept: '管理员',
-    email: 'sqbdiwd@gmail.com',
+    header: '密码',
+    key: 'password',
+    width: 30,
   },
   {
-    id: 4,
-    name: '赵六',
-    password: 122131321,
-    phone: 13144442453,
-    dept: '管理员',
-    email: 'sqbdiwd@gmail.com',
+    header: '岗位',
+    key: 'dept',
+    width: 20
   },
   {
-    id: 5,
-    name: '王二麻子',
-    password: 122131321,
-    phone: 13144442453,
-    dept: '管理员',
-    email: 'sqbdiwd@gmail.com',
+    header: '电话',
+    key: 'phone',
+    width: 30
   },
   {
-    id: 6,
-    name: '程睿',
-    password: 122131321,
-    phone: 13144442453,
-    dept: '管理员',
-    email: 'sqbdiwd@gmail.com',
+    header: '邮箱',
+    key: 'email',
+    width: 30
+  },
+  {
+    header: '状态',
+    key: 'status',
+    width: 20
   }
 ];
+const data = ref([]);
 const table = reactive({
   label: [
     {
@@ -65,7 +58,7 @@ const table = reactive({
     },
     {
       label: '用户名',
-      prop: 'name',
+      prop: 'username',
       width: '200px'
     },
     {
@@ -87,6 +80,11 @@ const table = reactive({
       label: '邮箱',
       prop: 'email',
       width: '200px'
+    },
+    {
+      label: '状态',
+      prop: 'status',
+      width: '200px',
     }
   ],
   operate: [
@@ -94,7 +92,6 @@ const table = reactive({
       type: 'primary',
       message: '修改',
       size: 'small',
-      disabled: true,
     },
     {
       type: 'danger',
@@ -105,11 +102,13 @@ const table = reactive({
       type: 'info',
       size: 'small',
       message: '冻结',
+      controller: () => employeeFrozen(),
     },
     {
-      type: 'primary',
+      type: 'success',
       size: 'small',
       message: '解冻',
+      controller: () => accountReload(),
     }
   ],
   multiple: false,
@@ -117,19 +116,15 @@ const table = reactive({
   maxHeight: '300',
   canEdit: true,
   isFixed: 'right',
-  width: '300px',
+  width: '280px',
   stripe: true,
   border: true,
 })
-//current change
-const currentChange = (current) => {
-  console.log(current)
-}
 //init pagination
 const pages = reactive({
-  total: 50,
+  total: 5,
   hide: true,
-  pageCount: 10,
+  pageSize: 5,
 })
 
 //search  user
@@ -144,20 +139,151 @@ const createUser = reactive({
   isRoot: '1',
   dept: '',
 })
-const dept = ref([
-  {
-    label: '经理',
-    value: '1',
-  },
-  {
-    label: '销售',
-    value: '2',
-  },
-  {
-    label: '管理',
-    value: '3',
+
+
+//page base setting
+const pageNo = ref(1)
+const pageSize = 5;
+
+//pull data
+const pullAll = () => {
+  axios.get(`http://localhost:3000/employee/pull?pageNo=${pageNo.value}&pageSize=${pageSize}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      pages.total = res.data.count;
+      res.data.data.forEach((item) => {
+        if (item.dept === 0) {
+          item.dept = '管理员'
+        } else {
+          item.dept = '销售'
+        }
+        if (item.status === 1) {
+          item.status = '正常'
+        } else {
+          item.status = '封禁中'
+        }
+        data.value.push(item);
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//refresh
+const refresh = () => {
+  //clear data
+  data.value = []
+  //re pull
+  pullAll()
+}
+
+//search employee
+const search = () => {
+  if (value.value) {
+    axios.get(`http://localhost:3000/employee/search?name=${value.value}`, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        //clear data
+        data.value = []
+        //重新赋值
+        data.value = res.data.data;
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err);
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: '请输入用户名'
+    })
   }
-])
+}
+
+//current change
+const current = ref()
+const currentChange = (item) => {
+  current.value = item
+}
+//frozen employee
+const employeeFrozen = () => {
+  axios.get(`http://localhost:3000/employee/frozen?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type: "success",
+        message: res.data.message,
+      })
+      //clear data
+      data.value = []
+      //re pull
+      pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message,
+      })
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//reload account
+const accountReload = () => {
+  axios.get(`http://localhost:3000/employee/reuse?id=${current.value.id}`, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    }
+  }).then((res) => {
+    if (res.data.code === 200) {
+      //clear data
+      data.value = []
+      //re pull
+       pullAll()
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message
+      })
+    }
+  }).catch((err) =>{
+    console.log(err);
+  })
+}
+//download excel
+const downloadExcel = async () => {
+  const sheetName = 'employee'
+  const response = await makeExcel(sheetName, columns, data.value)
+  const blob = new Blob([response.buffer]);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${sheetName}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.addEventListener('click', () => {
+    link.remove();
+  });
+}
+
+//om
+onMounted(() => {
+  //pull all data
+  pullAll()
+})
 </script>
 
 <template>
@@ -175,12 +301,14 @@ const dept = ref([
               style="width: 240px;height: 32px"
               class="my-auto"
           />
-          <el-button type="primary" icon="Search" class="ml-4 my-auto">搜索</el-button>
+          <el-button @click="search" type="primary" icon="Search" class="ml-4 my-auto">搜索</el-button>
           <!-- refresh button -->
-          <el-button type="primary" icon="Refresh" class="ml-4 my-auto">刷新</el-button>
+          <el-button @click="refresh" type="primary" icon="Refresh" class="ml-4 my-auto">刷新</el-button>
         </div>
         <!-- add new user button -->
         <el-button type="primary" icon="Plus" class="ml-auto" @click="dialogShow = true">添加</el-button>
+        <!-- download excel table -->
+        <el-button @click="downloadExcel" type="primary" icon="Document" class="ml-4">导出Excel</el-button>
       </div>
       <!-- table body -->
       <div style="height: calc(100% - 112px)" class="w-full relative block overflow-hidden">
@@ -203,7 +331,7 @@ const dept = ref([
         <PaginationComponent
             :total="pages.total"
             :hide="pages.hide"
-            :page-count="pages.pageCount"
+            :page-size="pages.pageSize"
         />
       </div>
     </div>

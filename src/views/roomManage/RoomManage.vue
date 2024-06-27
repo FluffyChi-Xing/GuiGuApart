@@ -6,6 +6,7 @@ import TableComponent from "@/components/common/TableComponent.vue";
 import { onMounted } from "vue";
 import axios from "axios";
 import {ElMessage} from "element-plus";
+import {makeExcel} from "@/utils/makeExcel.js";
 
 //pagination
 const pagination = reactive({
@@ -16,6 +17,53 @@ const pagination = reactive({
 
 //table constructor
 //table data
+const columns = [
+  {
+    header: '序号',
+    key: 'id',
+    width: 20,
+  },
+  {
+    header: '房间名',
+    key: 'name',
+    width: 30,
+  },
+  {
+    header: '房间号',
+    key: 'room_no',
+    width: 30,
+  },
+  {
+    header: '租金',
+    key: 'cost',
+    width: 20,
+  },
+  {
+    header: '公寓名',
+    key: 'apartment_name',
+    width: 30,
+  },
+  {
+    header: '所在省',
+    key: 'province',
+    width: 30
+  },
+  {
+    header: '所在市',
+    key: 'city',
+    width: 20,
+  },
+  {
+    header: '所在区',
+    key: 'district',
+    width: 30,
+  },
+  {
+    header: '状态',
+    key: 'status',
+    width: 20
+  }
+];
 const data = ref([])
 const table = reactive({
   labels: [
@@ -41,7 +89,22 @@ const table = reactive({
     },
     {
       label: '公寓名',
-      prop: 'name',
+      prop: 'apartment_name',
+      width: '200px'
+    },
+    {
+      label: '所在省',
+      prop: 'province',
+      width: '200px'
+    },
+    {
+      label: '所在市',
+      prop: 'city',
+      width: '200px',
+    },
+    {
+      label: '所在区',
+      prop: 'district',
       width: '200px'
     },
     {
@@ -158,7 +221,21 @@ const reloadRoom = () => {
     console.log(err)
   })
 }
-//delete room
+//download excel
+const downloadExcel = async () => {
+  const sheetName = 'rooms'
+  const response = await makeExcel(sheetName, columns, data.value)
+  const blob = new Blob([response.buffer]);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${sheetName}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.addEventListener('click', () => {
+    link.remove();
+  });
+}
 
 
 //分页拉取数据
@@ -398,6 +475,8 @@ onMounted(() => {
           <div class="w-auto h-full relative flex ml-auto justify-center">
             <el-button @click="createRoom" type="primary" icon="Plus" class="my-auto">添加</el-button>
           </div>
+          <!-- download excel -->
+          <el-button @click="downloadExcel" type="primary" icon="Document" class="my-auto ml-4">导出Excel</el-button>
         </div>
         <!-- body -->
         <div style="height: calc(100% - 112px)" class=" w-full relative block">
