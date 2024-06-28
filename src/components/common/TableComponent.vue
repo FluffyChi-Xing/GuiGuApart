@@ -44,14 +44,9 @@ const props = defineProps({
       >
         <template v-if="item.expand" #default="scope">
           <div class="w-full h-auto relative block p-4 text-ellipsis overflow-hidden whitespace-pre-line">
-            {{ scope.row.value }}
+            {{ scope.row.url }}
           </div>
         </template>
-      </el-table-column>
-      <el-table-column
-
-      >
-
       </el-table-column>
       <el-table-column
           v-if="props.canEdit"

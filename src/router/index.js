@@ -13,6 +13,7 @@ import RoomManage from "@/views/roomManage/RoomManage.vue";
 import ApartPage from "@/views/apartment/ApartPage.vue";
 import ClientPage from "@/views/ClientManage/ClientPage.vue";
 import IndenturePage from "@/views/indenture/IndenturePage.vue";
+import ImageManage from "@/views/imagemanage/ImageManage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -100,6 +101,14 @@ const router = createRouter({
           meta: {
             title: '尚庭公寓 | 租约管理'
           }
+        },
+        {
+          path: '/image',
+          name: '营销管理',
+          component: ImageManage,
+          meta: {
+            title: '尚庭公寓 | 营销管理'
+          },
         }
       ]
     },

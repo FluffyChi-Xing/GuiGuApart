@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import {
   Clock,
-  Document,
+  Document, Files,
   HomeFilled, List,
   Management,
   More,
@@ -56,6 +56,9 @@ const change = (to) => {
     case '/indenture':
       router.push(to)
           break;
+    case '/image':
+      router.push(to)
+          break;
   }
 }
 //持久化菜单高亮
@@ -86,6 +89,9 @@ const initMenu = () => {
       activeDefault.value = route.fullPath
           break;
     case '/indenture':
+      activeDefault.value = route.fullPath
+          break;
+    case '/image':
       activeDefault.value = route.fullPath
           break;
   }
@@ -136,6 +142,10 @@ watch(() => route.fullPath, () => {
         <el-menu-item index="/client">
           <el-icon><User /></el-icon>
           <span>客户管理</span>
+        </el-menu-item>
+        <el-menu-item index="/image">
+          <el-icon><Files /></el-icon>
+          <span>营销管理</span>
         </el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="3">
