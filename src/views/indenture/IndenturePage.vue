@@ -2,6 +2,7 @@
 import { reactive,ref } from "vue";
 import CopyRight from "@/components/common/CopyRight.vue";
 import PaginationComponent from "@/components/common/PaginationComponent.vue";
+import TableComponent from "@/components/common/TableComponent.vue";
 
 //pagination
 const pagination = reactive({
@@ -12,6 +13,75 @@ const pagination = reactive({
 
 //search value
 const value = ref()
+
+//table init
+const table = reactive({
+  highLight: true,
+  border: true,
+  multiple: false,
+  isFixed: 'right',
+  canEdit: true,
+  stripe: true,
+  width: '300px',
+  maxHeight: '300',
+})
+//data
+const data = ref()
+//labels
+const labels = [
+  {
+    label: '序号',
+    prop: 'id',
+    width: '100px'
+  },
+  {
+    label: '用户名',
+    prop: 'username',
+    width: '200px'
+  },
+  {
+    label: '电话号',
+    prop: 'phone',
+    width: '200px'
+  },
+  {
+    label: '公寓名',
+    prop: 'apart',
+    width: '200px'
+  },
+  {
+    label: '客房名',
+    prop: 'room',
+    width: '200px',
+  },
+  {
+    label: '租金',
+    prop: 'cost',
+    width: '200px'
+  },
+  {
+    label: '押金',
+    prop: 'mortgage',
+    width: '200px'
+  },
+  {
+    label: '开始时间',
+    prop: 'create_time',
+    width: '200px'
+  },
+  {
+    label: '截止时间',
+    prop: 'finish_time',
+    width: '200px'
+  },
+  {
+    label: '状态',
+    prop: 'status',
+    width: '200px'
+  }
+];
+//operation
+const operation = [];
 </script>
 
 <template>
@@ -36,8 +106,20 @@ const value = ref()
         <el-button type="primary" icon="Refresh" class="my-auto ml-4">刷新</el-button>
       </div>
       <!-- table body -->
-      <div style="height: calc(100% - 112px)" class="w-full relative block bg-amber-600">
-
+      <div style="height: calc(100% - 112px)" class="w-full relative block">
+           <TableComponent
+               :data="data"
+               :table="labels"
+               :high-light="table.highLight"
+               :is-fixed="table.isFixed"
+               :can-edit="table.canEdit"
+               :multiple="table.multiple"
+               :operate="operation"
+               :stripe="table.stripe"
+               :border="table.border"
+               :operate-width="table.width"
+               :max-height="table.maxHeight"
+           />
       </div>
       <!-- pagination -->
       <div class="w-full h-14 relative flex justify-center">

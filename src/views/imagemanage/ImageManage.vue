@@ -106,6 +106,7 @@ const pullAll = () => {
     },
   }).then((res) => {
     if (res.data.code === 200) {
+      pagination.total = res.data.count;
       data.value = res.data.data;
     }
   }).catch((err) => {
@@ -235,6 +236,83 @@ const deleteImage = () => {
     console.log(err);
   })
 }
+//create image
+const isShow = ref(false);
+const apartList = ref([])
+const roomList = ref([])
+const imageForm = reactive({
+  url: 'https://picsum.photos/200/300',
+  roomId: 0,
+  apart_id: 0,
+})
+
+//create image
+const pullRoom = () => {
+  axios.get('http://localhost:3000/rooms/base', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      roomList.value = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+const pullApart = () => {
+  axios.get('http://localhost:3000/apartment/base', {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      apartList.value = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+const createImage = () => {
+  isShow.value = true;
+  //pull room list
+  pullRoom()
+  //pull apart list
+  pullApart()
+}
+
+//submit create
+const submitImage = () => {
+  axios.post('http://localhost:3000/image/create', {
+    url: imageForm.url,
+    apart_id: imageForm.apart_id,
+    room_id: imageForm.roomId,
+  }, {
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      ElMessage({
+        type:"success",
+        message: res.data.message,
+      })
+      //clear
+      data.value = []
+      //re pull
+      pullAll()
+      isShow.value = false
+    } else {
+      ElMessage({
+        type: "warning",
+        message: res.data.message
+      })
+      isShow.value = false
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
 
 //om
 onMounted(() => {
@@ -279,7 +357,7 @@ onMounted(() => {
                 :value="item.value"
             />
           </el-select>
-          <el-button type="primary" icon="Plus" class="my-auto">添加图片</el-button>
+          <el-button @click="createImage" type="primary" icon="Plus" class="my-auto">添加图片</el-button>
         </div>
       </div>
       <!-- table main body -->
@@ -311,6 +389,61 @@ onMounted(() => {
     </div>
     <!-- copy-right -->
     <CopyRight />
+    <!-- dialogs -->
+    <!-- create image dialog -->
+    <el-dialog
+        v-model="isShow"
+        title="添加图片"
+        width="500px"
+        draggable
+    >
+      <div class="w-full h-auto relative block">
+        <el-form
+            v-model="imageForm"
+            label-width="auto"
+        >
+          <el-form-item label="上传图片">
+            <el-upload
+                v-model="imageForm.url"
+                :limit="1"
+                action="#"
+            >
+              <el-button icon="Upload" type="primary">上传图片</el-button>
+            </el-upload>
+          </el-form-item>
+          <el-form-item label="所属房间">
+            <el-select
+                v-model="imageForm.roomId"
+                placeholder="请选择图片所属客房"
+            >
+              <el-option
+                  v-for="item in roomList"
+                  :key="item"
+                  :label="item.name"
+                  :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="所属公寓">
+            <el-select
+                v-model="imageForm.apart_id"
+                placeholder="请选择图片所属公寓"
+            >
+              <el-option
+                  v-for="item in apartList"
+                  :key="item"
+                  :label="item.name"
+                  :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="submitImage" type="primary" icon="Select">确认添加</el-button>
+        <el-button @click="isShow = false" type="danger" icon="CircleClose">取消</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
