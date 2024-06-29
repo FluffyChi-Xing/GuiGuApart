@@ -142,6 +142,35 @@ const countApart = () => {
   })
 }
 
+//count employee
+const countEmployee = () => {
+  axios.get('http://localhost:3000/employee/count',{
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      messageCard.value[2].number = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+//count indenture
+const countIndenture = () => {
+  axios.get('http://localhost:3000/indenture/count',{
+    headers: {
+      Authorization: `Bearer ${getAccess()}`,
+    },
+  }).then((res) => {
+    if (res.data.code === 200) {
+      messageCard.value[3].number = res.data.data;
+    }
+  }).catch((err) => {
+    console.log(err);
+  })
+}
+
 
 
 //om
@@ -178,6 +207,10 @@ onMounted(() => {
   countRoom()
   //count apartment
   countApart()
+  //count employee
+  countEmployee()
+  //count indenture
+  countIndenture()
 })
 </script>
 
