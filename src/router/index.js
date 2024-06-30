@@ -5,7 +5,6 @@ import DashBoard from "@/views/dashboard/DashBoard.vue";
 import UserCenter from "@/views/usercenter/UserCenter.vue";
 import LoginPage from "@/views/login/LoginPage.vue";
 import UserManage from "@/views/UserManage/UserManage.vue";
-import JobManage from "@/views/job/JobManage.vue";
 import LookAndBook from "@/views/looking&book/LookAndBook.vue";
 import AttributeManage from "@/views/attribute/AttributeManage.vue";
 import axios from "axios";
@@ -14,6 +13,7 @@ import ApartPage from "@/views/apartment/ApartPage.vue";
 import ClientPage from "@/views/ClientManage/ClientPage.vue";
 import IndenturePage from "@/views/indenture/IndenturePage.vue";
 import ImageManage from "@/views/imagemanage/ImageManage.vue";
+import PageNotFound from "@/views/pageNotFound/pageNotFound.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -45,14 +45,6 @@ const router = createRouter({
           meta: {
             title: '尚庭公寓 | 用户管理'
           }
-        },
-        {
-          path: '/job',
-          name: '岗位管理',
-          component: JobManage,
-          meta: {
-            title: '尚庭公寓 | 岗位管理',
-          },
         },
         {
           path: '/look',
@@ -119,6 +111,14 @@ const router = createRouter({
       meta: {
         title: '尚庭公寓 | 登录页',
       },
+    },
+    {
+      path: '/notFound',
+      name: '404',
+      component: PageNotFound,
+      meta: {
+        title: '尚庭公寓 | 页面走丢了'
+      }
     }
   ]
 })
@@ -128,6 +128,21 @@ const checkName = async (to) => {
     document.title = to.meta.title
   }
 }
+//white list
+const whiteList = [
+    '/login',
+    '/notFound',
+    '/image',
+    '/indenture',
+    '/client',
+    '/apart',
+    '/rooms',
+    '/attribute',
+    '/look',
+    '/users',
+    '/user',
+    '/',
+]
 //refresh token
 const refreshToken = async () => {
   const refresh = localStorage.getItem('refresh').toString()
@@ -143,9 +158,16 @@ const refreshToken = async () => {
   }
 }
 
+
 //前置路由守卫
-router.beforeEach(async (to) => {
+router.beforeEach(async (to,from, next) => {
   await checkName(to)
+  //判断访问地址是否在白名单中,如果在则直接跳转404页面
+    if (whiteList.indexOf(to.path) === -1) {
+        next('/notFound')
+    } else {
+        next()
+    }
   NProgress.start()
 })
 //后置路由守卫

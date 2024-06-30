@@ -3,7 +3,7 @@ import { ref } from "vue";
 import {
   Clock,
   Document, Files,
-  HomeFilled, List,
+  HomeFilled,
   Management,
   More,
   Odometer,
@@ -33,9 +33,6 @@ const change = (to) => {
       router.push(to)
           break;
     case '/users':
-      router.push(to)
-          break;
-    case '/job':
       router.push(to)
           break;
     case '/look':
@@ -68,9 +65,6 @@ const initMenu = () => {
       activeDefault.value = route.fullPath
           break;
     case '/users':
-      activeDefault.value = route.fullPath
-          break;
-    case '/job':
       activeDefault.value = route.fullPath
           break;
     case '/look':
@@ -134,10 +128,6 @@ watch(() => route.fullPath, () => {
         <el-menu-item index="/users">
           <el-icon><Service /></el-icon>
           <span>用户管理</span>
-        </el-menu-item>
-        <el-menu-item index="/job">
-          <el-icon><List /></el-icon>
-          <span>岗位管理</span>
         </el-menu-item>
         <el-menu-item index="/client">
           <el-icon><User /></el-icon>

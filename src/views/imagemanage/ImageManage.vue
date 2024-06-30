@@ -7,6 +7,7 @@ import { onMounted } from "vue";
 import axios from "axios";
 import {getAccess} from "@/utils/getAccess.js";
 import {ElMessage} from "element-plus";
+import {uploadService} from "@/utils/upload-service.js";
 
 //pagination
 const pagination = reactive({
@@ -241,12 +242,26 @@ const isShow = ref(false);
 const apartList = ref([])
 const roomList = ref([])
 const imageForm = reactive({
-  url: 'https://picsum.photos/200/300',
+  url: [],
   roomId: 0,
   apart_id: 0,
+  service_name: 'guigu-image',
 })
 
 //create image
+
+//uploadref
+const uploadRef = ref()
+//upload file name
+const uploadFileName = ref()
+//generateFileName
+const generateFileName = (ossData, file) => {
+  const suffix = file.name.split(file.name.lastIndexOf('.'));
+  const fileName = imageForm.service_name + Date.now() + suffix;
+  uploadFileName.value = fileName;
+  const dir = ossData.dir;
+  return dir + fileName;
+}
 const pullRoom = () => {
   axios.get('http://localhost:3000/rooms/base', {
     headers: {
@@ -282,9 +297,9 @@ const createImage = () => {
 }
 
 //submit create
-const submitImage = () => {
-  axios.post('http://localhost:3000/image/create', {
-    url: imageForm.url,
+const submitImage = async (ossData) => {
+  await axios.post('http://localhost:3000/image/create', {
+    url: `${ossData.host}/${ossData.dir}${uploadFileName.value}`,
     apart_id: imageForm.apart_id,
     room_id: imageForm.roomId,
   }, {
@@ -312,6 +327,15 @@ const submitImage = () => {
   }).catch((err) => {
     console.log(err);
   })
+}
+//handle upload
+const handleUpload = async () => {
+  await uploadService(imageForm, submitImage, generateFileName);
+}
+//get image
+const getImage = (file, fileList) => {
+  imageForm.url = fileList;
+  console.log(imageForm.url)
 }
 
 //om
@@ -404,9 +428,14 @@ onMounted(() => {
         >
           <el-form-item label="上传图片">
             <el-upload
-                v-model="imageForm.url"
+                ref="uploadRef"
+                :auto-upload="false"
+                accept=".jpg,.png"
                 :limit="1"
                 action="#"
+                :on-change="getImage"
+                :file-list="imageForm.url"
+                :show-file-list="true"
             >
               <el-button icon="Upload" type="primary">上传图片</el-button>
             </el-upload>
@@ -440,7 +469,7 @@ onMounted(() => {
         </el-form>
       </div>
       <template #footer>
-        <el-button @click="submitImage" type="primary" icon="Select">确认添加</el-button>
+        <el-button @click="handleUpload" type="primary" icon="Select">确认添加</el-button>
         <el-button @click="isShow = false" type="danger" icon="CircleClose">取消</el-button>
       </template>
     </el-dialog>
