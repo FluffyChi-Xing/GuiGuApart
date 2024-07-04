@@ -8,12 +8,11 @@ import { onMounted } from "vue";
 
 //user information
 const information = reactive({
-  username: '张三',
-  password: 114514,
+  username: '',
+  password: '',
   isRoot: '1',
-  phone: 15188870756,
-  email: 'oqhioqfiqw@gmil.com',
-  id_number: '652836999262917729',
+  phone: '',
+  email: '',
   code: '',
 })
 
@@ -35,17 +34,13 @@ const handleDownload = (file: UploadFile) => {
   console.log(file)
 }
 
-//get user id
-const getUserId = () => {
-  return localStorage.getItem('default_user')
-}
 //get access
 const getAccess = () => {
   return localStorage.getItem('access').toString()
 }
 //get user info by id
-const getUser = () => {
-  axios.get(`http://localhost:3000/employee/searchId?id=${getUserId()}`, {
+const getUser = async () => {
+  await axios.get(`http://localhost:3000/employee/searchId?id=1`, {
     headers: {
       Authorization: `Bearer ${getAccess()}`,
     },
@@ -65,6 +60,63 @@ const getUser = () => {
   }).catch((err) => {
     console.log(err)
   })
+}
+//code button message
+const message = ref('发送验证码')
+const count = ref(60)
+const disable = ref(false)
+//send code
+const sendCode = () => {
+  setTimeout(() => {
+    count.value--
+    if (count.value > 0) {
+      message.value = `${count.value}秒后重新发送`
+      disable.value = true
+      sendCode() //递归
+    } else {
+      message.value = '发送验证码'
+      count.value = 60
+      disable.value = false
+    }
+  }, 1000);
+}
+//submit update
+const submitUpdate = () => {
+  if (information.code) {
+    axios.post('http://localhost:3000/employee/update', {
+      id: 2,
+      username: information.username,
+      phone: information.phone,
+      email: information.email,
+      code: information.code,
+    }, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        ElMessage({
+          type: "success",
+          message: res.data.message,
+        })
+        information.username = res.data.data.username;
+        information.phone = res.data.data.phone;
+        information.email = res.data.data.email;
+      } else {
+        ElMessage({
+          type: "warning",
+          message: res.data.message,
+        })
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    ElMessage({
+      type: "warning",
+      message: "请输入验证码",
+    })
+  }
 }
 
 //om
@@ -132,8 +184,9 @@ onMounted(() => {
           <el-form-item label="用户名">
             <el-input
                 v-model="information.username"
-                disabled
                 prefix-icon="User"
+                placeholder="请输入用户名"
+                clearable
             />
           </el-form-item>
           <el-form-item label="密码">
@@ -142,6 +195,7 @@ onMounted(() => {
                 placeholder="请输入密码"
                 prefix-icon="Lock"
                 clearable
+                disabled
                 show-password
             />
           </el-form-item>
@@ -163,16 +217,6 @@ onMounted(() => {
                 prefix-icon="Message"
             />
           </el-form-item>
-          <el-form-item label="身份证号">
-            <el-input
-                v-model="information.id_number"
-                placeholder="请输入身份证号"
-                clearable
-                maxlength="18"
-                show-word-limit
-                prefix-icon="Warning"
-            />
-          </el-form-item>
           <el-form-item label="验证码">
             <el-input
                 v-model="information.code"
@@ -183,10 +227,12 @@ onMounted(() => {
                 prefix-icon="More"
                 style="width: 240px;margin-right: 16px"
             />
-            <el-button type="primary" icon="Position">发送验证码</el-button>
+            <el-button @click="sendCode" :disabled="disable" type="primary" icon="Position">
+              {{ message }}
+            </el-button>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="Select" class="w-full">确认修改</el-button>
+            <el-button @click="submitUpdate" type="primary" icon="Select" class="w-full">确认修改</el-button>
           </el-form-item>
         </el-form>
       </div>

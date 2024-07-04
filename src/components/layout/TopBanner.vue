@@ -7,6 +7,8 @@ import {ElMessage} from "element-plus";
 import { useRoute } from "vue-router";
 import { onMounted } from "vue";
 import { watch } from "vue";
+import axios from "axios";
+import {getAccess} from "@/utils/getAccess.js";
 
 //store
 const store = useCounterStore()
@@ -69,10 +71,42 @@ const checkRoute = () => {
     }
   })
 }
+//employee avatar
+const avatar = ref('https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png')
+const id = ref(2)
+//get avatar from local storage
+const defaultAvatar = async () => {
+  return localStorage.getItem('defaultAvatar')
+}
+//get avatar
+const getAvatar = async () => {
+  if (defaultAvatar) {
+    await axios.get(`http://localhost:3000/employee/avatar?id=${id.value}`, {
+      headers: {
+        Authorization: `Bearer ${getAccess()}`,
+      },
+    }).then((res) => {
+      if (res.data.code === 200) {
+        avatar.value = res.data.data
+        localStorage.setItem('defaultAvatar', res.data.data)
+      }
+    }).catch((err) => {
+      console.log(err)
+    })
+  } else {
+    avatar.value = defaultAvatar
+  }
+}
+
+
+
 
 //om
 onMounted(() => {
+  //check route
   checkRoute()
+  //get avatar
+  getAvatar()
 })
 //watch
 watch(() => route.fullPath, () => {
@@ -144,7 +178,7 @@ watch(() => route.fullPath, () => {
               shape="circle"
               size="default"
               class="my-auto cursor-pointer"
-              src='https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+              :src="avatar"
           />
         </el-tooltip>
       </div>
